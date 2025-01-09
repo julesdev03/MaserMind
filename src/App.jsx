@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './app.css'
+import './App.css'
 import { Popover, Button } from "antd";
 
 function getRandomSelection(array, count) {
