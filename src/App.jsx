@@ -29,6 +29,7 @@ function App() {
   let pageContent = null;
   if (page == 'start') {
     pageContent = <LandPage setPage={setPage}/>
+    console.log("Page start.");
   } else if (page == 'game-master-mind') {
     pageContent = <GamePage setPage={setPage} setIsGameWon={setIsGameWon}/>
   }
@@ -238,7 +239,6 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
     newGameBubble[bubbleProperties['index'][0]][bubbleProperties['index'][1]]['color'] = bubbleProperties['color'];
     // Check who is active
     newGameBubble = checkActive(newGameBubble);
-    console.log(newGameBubble);
 
     setGameBubbles(newGameBubble);
 
@@ -246,7 +246,6 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
     let activeRow = [{}];
     let activeOg = activeChecker(gameBubbles);
     let activeNew = activeChecker(newGameBubble);
-    console.log(activeNew);
     if (activeNew != activeOg) {
       activeRow = computerLogic(newGameBubble[activeOg], winningCombination);
       let newComputerBoard = [...computerBubbles.map(row => [...row.map(bubble => ({ ...bubble }))])];
