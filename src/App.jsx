@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './App.css'
+import './app.css'
 import { Popover, Button } from "antd";
 
 function getRandomSelection(array, count) {
@@ -24,7 +24,7 @@ let winningCombination;
 function App() {
   // Pagination
   const [page, setPage] = useState('start');
-  const [isGameWon, setIsGameWon] = useState(false);
+  const [isGameWon, setIsGameWon] = useState({'status': false, "message":""});
 
   let pageContent = null;
   if (page == 'start') {
@@ -42,10 +42,10 @@ function App() {
     <>
       <div id='page'>
         {pageContent}
-        {isGameWon && (
+        {isGameWon.status && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <h1>Congratulations!</h1>
+            <h1>{isGameWon.message}</h1>
             <p>The Computer selection was:</p>
             <div className='flexer gap centered' style={{marginBottom:'1rem'}}>
               {winningCombination.map((item, index)=> (
@@ -130,8 +130,15 @@ function checkActive(input) {
       if (j == 3 && checker == 4) {
         rowChecker = true;
       }
+      if (i == 9 && j == 3 && checker == 4) {
+        input.forEach(row => {
+          row.forEach(element => {
+            element.active = null;
+          });
+        });
+      }
     }
-  }
+    }
   return input;
 }
 
@@ -141,7 +148,8 @@ function activeChecker(input) {
       if (input[i][j].active != null) {
         return i
       }
-    }}
+  }}
+  return 10;
 }
 
 function compareLists(list1, list2) {
@@ -230,6 +238,7 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
     newGameBubble[bubbleProperties['index'][0]][bubbleProperties['index'][1]]['color'] = bubbleProperties['color'];
     // Check who is active
     newGameBubble = checkActive(newGameBubble);
+    console.log(newGameBubble);
 
     setGameBubbles(newGameBubble);
 
@@ -237,18 +246,19 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
     let activeRow = [{}];
     let activeOg = activeChecker(gameBubbles);
     let activeNew = activeChecker(newGameBubble);
+    console.log(activeNew);
     if (activeNew != activeOg) {
       activeRow = computerLogic(newGameBubble[activeOg], winningCombination);
       let newComputerBoard = [...computerBubbles.map(row => [...row.map(bubble => ({ ...bubble }))])];
       newComputerBoard[activeOg] = activeRow;
       setComputerBubbles(newComputerBoard);
-      console.log(activeRow);
     }
     // Check if won
     const allSameColor = activeRow.every(obj => obj.color === "white");
     if (allSameColor) {
-      setIsGameWon(true);
-      console.log("Won");
+      setIsGameWon({'status': true, "message": "Congratulations!"});
+    } else if (activeNew == 10) {
+      setIsGameWon({'status': true, "message": "Almost there!"});
     }
   }
   

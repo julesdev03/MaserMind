@@ -182,6 +182,12 @@ td {
   z-index: 1000; /* Ensures the popup is above other content */
 }
 
+.popup-overlay h1 {
+  background: -webkit-linear-gradient(aquamarine, rgb(0, 136, 255));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .popup-content {
   background: white;
   padding: 1rem;
