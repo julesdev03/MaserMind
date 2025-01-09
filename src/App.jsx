@@ -34,7 +34,7 @@ function App() {
   }
 
   const closePopup = () => {
-    setIsGameWon(false);
+    setIsGameWon({'status': false, "message":""});
     setPage('start');
   };
 
