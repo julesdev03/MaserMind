@@ -5,7 +5,6 @@ body {
 
 #page {
   display: flex;
-  /* background-color: blanchedalmond; */
   min-height: 100dvh;
   justify-content: center;
   align-items: center;
@@ -23,6 +22,7 @@ body {
   justify-content: center;
   align-items: center;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  margin-block: 3rem;
 }
 
 .box-start h1 {
@@ -60,7 +60,7 @@ h1 {
 }
 
 .bubble {
-  background-color: rgba(198, 198, 198, 0.479);
+  background-color: rgba(198, 198, 198, 0.658);
   height: 25px;
   width: 25px;
   border-radius: 50%;
@@ -112,6 +112,7 @@ h1 {
   width: 80%;
   max-width: 1000px;
   min-width: 300px;
+  margin-block: 3rem;
 }
 
 #game-container.gap {
@@ -146,6 +147,9 @@ h1 {
 .container-fade > *:nth-child(4) {
   --i: 3; /* 1.5s delay */
 }
+.container-fade > *:nth-child(5) {
+  --i: 4; /* 1.5s delay */
+}
 
 .fader {
   opacity:0;
@@ -158,11 +162,19 @@ h1 {
 }
 
 td {
-  padding-bottom: .5rem;
+  padding-bottom: .75rem;
 }
 
 .purple {
   background-color: purple;
+}
+
+.rose {
+  background-color: pink;
+}
+
+.orange {
+  background-color: orange;
 }
 
 .grey {
@@ -200,6 +212,60 @@ td {
   margin-bottom: 20px;
 }
 
-.computerTd {
+.picker-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  border: 1px solid rosybrown;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #aaaaaa21;
+}
+
+.picker-option {
+  flex: 1;
+  text-align: center;
+  padding: .5rem;
+  cursor: pointer;
+  color: rosybrown;
+  transition: color 0.3s ease;
+  z-index: 1;
+  font-weight: bold;
+}
+
+.picker-option.selected {
+  color: white;
+  font-weight:700;
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rosybrown;
+  z-index: 0;
+  transition: transform 0.3s ease;
+  border-radius: 8px;
+}
+
+@media (max-width: 470px) {
+  
+  .gap {
+    gap: .8rem;
+  }
+
+  .bubble {
+    height: 20px;
+    width: 20px;
+  }
+
+  .box-start h1 {
+    font-size: 2.8rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
 
 }

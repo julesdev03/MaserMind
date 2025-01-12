@@ -20,18 +20,19 @@ function getRandomSelection(array, count) {
 }
 
 let winningCombination;
+let optionsSelection;
   
 function App() {
   // Pagination
   const [page, setPage] = useState('start');
   const [isGameWon, setIsGameWon] = useState({'status': false, "message":""});
+  const [gameParameters, setGameParameters] = useState({'tries': 10, 'colors': 6, 'pick': 4});
 
   let pageContent = null;
   if (page == 'start') {
-    pageContent = <LandPage setPage={setPage}/>
-    console.log("Page start.");
+    pageContent = <LandPage setterGameParameters={setGameParameters} gameParameters={gameParameters} setPage={setPage}/>
   } else if (page == 'game-master-mind') {
-    pageContent = <GamePage setPage={setPage} setIsGameWon={setIsGameWon}/>
+    pageContent = <GamePage setterGameParameters={setGameParameters} gameParameters={gameParameters} setPage={setPage} setIsGameWon={setIsGameWon}/>
   }
 
   const closePopup = () => {
@@ -62,24 +63,86 @@ function App() {
   )
 }
 
-function LandPage({ setPage }) {
+function SlidersPick({options, title, defaultValue, gameParameters, setterGameParameters}) {
+  const [selectedIndex, setSelectedIndex] = useState(options.indexOf(gameParameters[defaultValue]));
+
+  function handleOptionClick(index) {
+    setSelectedIndex(index);
+    let currentValue = {...gameParameters};
+    currentValue[defaultValue] = options[index];
+    setterGameParameters(currentValue);
+  };
+
+  return (
+    <div style={{width: "80%"}}>
+      <p style={{'color': 'rgb(0, 136, 255)', 'fontWeight': 'bold'}}>{title}</p>
+      <div className="picker-container">
+      <div
+        className="slider"
+        style={{
+          transform: `translateX(${selectedIndex * 100}%)`,
+          width: `calc(100% / ${options.length})`,
+        }}
+      ></div>
+      {options.map((option, index) => (
+        <div
+          key={index}
+          className={`picker-option ${
+            index === selectedIndex ? "selected" : ""
+          }`}
+          onClick={() => handleOptionClick(index)}
+        >
+          {option}
+        </div>
+      ))}
+    </div>
+    </div>
+    
+  );
+}
+
+function LandPage({ setPage, gameParameters, setterGameParameters }) {
 
   function handleClickPage(){
-    winningCombination = getRandomSelection(['red', 'yellow', 'black', 'purple', 'blue', 'green'], 4);
-    setPage('game-master-mind')
+    optionsSelection = ['red', 'yellow', 'black', 'purple', 'blue', 'green'];
+    if(gameParameters.colors == 7) {
+      optionsSelection.push('rose');
+    }
+    if (gameParameters.colors == 8) {
+      optionsSelection.push('rose');
+      optionsSelection.push('orange');
+    }
+    winningCombination = getRandomSelection(optionsSelection, gameParameters.pick);
+    setPage('game-master-mind');
   }
 
   return (
     <>
-    <div className='box-start'>
-      <h1>MasterMind</h1>
-      <button className='button' onClick={handleClickPage}>START</button>
+    <div className='box-start flexer flexer-column gap'>
+      <h1 style={{'margin': '0'}}>MasterMind</h1>
+      <SlidersPick options={[10, 11, 12]} defaultValue={'tries'} gameParameters={gameParameters} setterGameParameters={setterGameParameters} title="Pick the amount of tries:"/>
+      <SlidersPick options={[6, 7, 8]} defaultValue={'colors'} gameParameters={gameParameters} setterGameParameters={setterGameParameters} title="Pick the amount colors:"/>
+      <SlidersPick options={[4, 5]} defaultValue={'pick'} gameParameters={gameParameters} setterGameParameters={setterGameParameters} title="Pick the amount of computer's pick:"/>
+      <button className='button' onClick={handleClickPage} style={{'marginTop': '1.5rem'}}>START</button>
     </div>
     </>
   )
 }
 
-function HeaderGame(){
+function HeaderGame({gameParameters}){
+  let contentDiv;
+  function setContent() {
+    if (gameParameters.colors == 7) {
+        contentDiv = <div className='bubble rose'></div>
+        return   
+    }
+    if (gameParameters.colors == 8) {
+      contentDiv = <><div className='bubble rose'></div><div className='bubble orange'></div></>
+      return   
+  }
+  }
+  setContent();
+
   return (
     <>
     <div className='header-game flexer flexer-column centered gap'>
@@ -91,6 +154,7 @@ function HeaderGame(){
           <div className='bubble green'></div>
           <div className='bubble purple'></div>
           <div className='bubble black'></div>
+          {contentDiv}
         </div>
       </div></>
   )
@@ -111,13 +175,13 @@ function ComputerMind({ winningCombination }) {
 
 function checkActive(input) {
   let rowChecker = false;
-  for(let i=0; i < 10; i++) {
+  for(let i=0; i < input.length; i++) {
     let checker = 0;
-    for (let j=0;j<4; j++) {
+    for (let j=0;j<input[0].length; j++) {
       if(input[i][j]['color'] != null) {
         checker++;
       }
-      if (j == 3 && checker != 4 && rowChecker==true) {
+      if (j == (input[0].length - 1) && checker != input[0].length && rowChecker==true) {
         input.forEach(row => {
           row.forEach(element => {
             element.active = null;
@@ -128,10 +192,10 @@ function checkActive(input) {
         });
         return input;
       }
-      if (j == 3 && checker == 4) {
+      if (j == (input[0].length - 1) && checker == input[0].length) {
         rowChecker = true;
       }
-      if (i == 9 && j == 3 && checker == 4) {
+      if (i == (input.length - 1) && j == (input[0].length - 1) && checker == input[0].length) {
         input.forEach(row => {
           row.forEach(element => {
             element.active = null;
@@ -144,13 +208,13 @@ function checkActive(input) {
 }
 
 function activeChecker(input) {
-  for(let i=0; i < 10; i++) {
-    for (let j=0;j<4; j++) {
+  for(let i=0; i < input.length; i++) {
+    for (let j=0;j<input[0].length; j++) {
       if (input[i][j].active != null) {
         return i
       }
   }}
-  return 10;
+  return input.length;
 }
 
 function compareLists(list1, list2) {
@@ -232,7 +296,7 @@ function computerLogic(inputUser, inputComputer) {
   
 }
 
-function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, computerBubbles, setComputerBubbles, setPage, setIsGameWon}) {
+function ClickableBubble({gameParameters, bubbleProperties, setGameBubbles, gameBubbles, computerBubbles, setComputerBubbles, setPage, setIsGameWon}) {
 
   function changeColor() {
     let newGameBubble = [...gameBubbles.map(row => [...row.map(bubble => ({ ...bubble }))])];
@@ -256,7 +320,7 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
     const allSameColor = activeRow.every(obj => obj.color === "white");
     if (allSameColor) {
       setIsGameWon({'status': true, "message": "Congratulations!"});
-    } else if (activeNew == 10) {
+    } else if (activeNew == gameBubbles.length) {
       setIsGameWon({'status': true, "message": "Almost there!"});
     }
   }
@@ -269,7 +333,7 @@ function ClickableBubble({bubbleProperties, setGameBubbles, gameBubbles, compute
   )
 }
 
-function ModifBubble({ setIsGameWon, bubbleProperties, setGameBubbles, gameBubbles, computerBubbles, setComputerBubbles, setPage }) {
+function ModifBubble({ gameParameters, setIsGameWon, bubbleProperties, setGameBubbles, gameBubbles, computerBubbles, setComputerBubbles, setPage }) {
 
   const [open, setOpen] = useState(false);
 
@@ -283,14 +347,14 @@ function ModifBubble({ setIsGameWon, bubbleProperties, setGameBubbles, gameBubbl
 
   function setContentPopover() {
     let listContent = [];
-    const listColors = ['red', 'black', 'purple', 'yellow', 'blue', 'green'];
+    const listColors = optionsSelection;
     for (let i=0; i<listColors.length; i++) {
       listContent.push({'color': listColors[i], 'index': bubbleProperties['index'], 'active': bubbleProperties['active']})
     }
     return (<div className='flexer gap' onClick={closePopover}>
       {listContent.map((bubble, index) => (
         <>
-        <ClickableBubble setIsGameWon={setIsGameWon} bubbleProperties={bubble} setGameBubbles={setGameBubbles} gameBubbles={gameBubbles} computerBubbles={computerBubbles} setComputerBubbles={setComputerBubbles} setPage={setPage}/>
+        <ClickableBubble gameParameters={gameParameters} setIsGameWon={setIsGameWon} bubbleProperties={bubble} setGameBubbles={setGameBubbles} gameBubbles={gameBubbles} computerBubbles={computerBubbles} setComputerBubbles={setComputerBubbles} setPage={setPage}/>
         </>
       ))}
     </div>)
@@ -322,20 +386,20 @@ function ModifBubble({ setIsGameWon, bubbleProperties, setGameBubbles, gameBubbl
   )
 }
 
-function GamePage({ setPage, setIsGameWon }) {
+function GamePage({ setPage, setIsGameWon, gameParameters }) {
   function handleClickPage(){
-    setPage('start')
+    setPage('start');
   }
 
   let stateBubbles = () => {
     let bubbleTable = [];
-    for (let i=0; i < 10; i++) {
+    for (let i=0; i < gameParameters.tries; i++) {
       let bubbles = [];
       let isActive = null;
       if(i == 0){
         isActive = 'active-bubble';
       }
-      for (let j=0; j<4; j++) {
+      for (let j=0; j<gameParameters.pick; j++) {
         let indBubble = {'color': null, 'index': [i, j], 'active': isActive}
         bubbles.push(indBubble);
       }
@@ -354,11 +418,11 @@ function GamePage({ setPage, setIsGameWon }) {
   return (
     <>
     <div id='game-container' className='flexer flexer-column centered gap'>
-      <HeaderGame></HeaderGame>
+      <HeaderGame gameParameters={gameParameters}></HeaderGame>
       <ComputerMind winningCombination={winningCombination}/>
 
       <div id="game-table" className='flexer flexer-column centered'>
-      <table style={{width: '100%', maxWidth: "380px"}}>
+      <table style={{width: '100%', maxWidth: "400px"}}>
         <thead>
           <tr>
             <th>Player</th>
@@ -375,14 +439,14 @@ function GamePage({ setPage, setIsGameWon }) {
         <div className='flexer gap centered'>
         {
         row.map((bubble, indexColor) => (
-            <ModifBubble setIsGameWon={setIsGameWon} setPage={setPage} bubbleProperties={bubble} setGameBubbles={setGameBubbles} gameBubbles={gameBubbles} computerBubbles={computerBubbles} setComputerBubbles={setComputerBubbles}/>
+            <ModifBubble gameParameters={gameParameters} setIsGameWon={setIsGameWon} setPage={setPage} bubbleProperties={bubble} setGameBubbles={setGameBubbles} gameBubbles={gameBubbles} computerBubbles={computerBubbles} setComputerBubbles={setComputerBubbles}/>
         ))
         }
         </div>
         
       </td>
       <td key={indexItem+200}>
-        <div className='flexer centered' style={{gap :'.4rem'}}>
+        <div className='flexer centered' style={{gap :'.25rem'}}>
         {computerBubbles[indexItem].map((bubble, indexColor) => (
         <div className={`bubble ${bubble['color']}`}></div>
     ))}
